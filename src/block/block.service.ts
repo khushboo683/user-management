@@ -1,16 +1,21 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { User, UserDocument } from '../models/userSchema';
 
 @Injectable()
 export class BlockService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async blockUser(userId: string, blockedUserId: string): Promise<User> {
+  async blockUser(userId:string, blockedUserId: string): Promise<User> {
     const user = await this.userModel.findById(userId).exec();
-    if (!user) {
+    const userToBeBlocked = await this.userModel.findById(blockedUserId).exec();
+    if (!user || !userToBeBlocked) {
       throw new NotFoundException('User not found');
+    }
+    const blockedUserInd=user.blockedUsers.findIndex(blockedUser=>blockedUser===blockedUserId)
+    if(blockedUserInd!==-1){
+        throw new BadRequestException('User is already blocked!')
     }
     user.blockedUsers.push(blockedUserId);
     return user.save();
@@ -18,8 +23,13 @@ export class BlockService {
 
   async unblockUser(userId: string, blockedUserId: string): Promise<User> {
     const user = await this.userModel.findById(userId).exec();
-    if (!user) {
+    const userToBeUnblocked = await this.userModel.findById(blockedUserId).exec();
+    if (!user || !userToBeUnblocked) {
       throw new NotFoundException('User not found');
+    }
+    const blockedUserInd=user.blockedUsers.findIndex(blockedUser=>blockedUser===blockedUserId)
+    if(blockedUserInd ===-1){
+        throw new BadRequestException('User is not blocked!')
     }
     user.blockedUsers = user.blockedUsers.filter(id => id !== blockedUserId);
     return user.save();

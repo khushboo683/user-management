@@ -1,17 +1,29 @@
-import { Controller, Post, Param } from '@nestjs/common';
+import { Controller, Post, Param, Req } from '@nestjs/common';
 import { BlockService } from './block.service';
+import { ObjectId } from 'mongoose';
 
 @Controller('block')
 export class BlockController {
   constructor(private readonly blockService: BlockService) {}
 
-  @Post(':userId/block/:blockedUserId')
-  blockUser(@Param('userId') userId: string, @Param('blockedUserId') blockedUserId: string) {
-    return this.blockService.blockUser(userId, blockedUserId);
+  @Post('/:blockedUserId')
+  async blockUser(@Req() req, @Param('blockedUserId') blockedUserId: string) {
+    try{
+    console.log("Req",req);    
+    const userId = req.userId.userId;
+    return await this.blockService.blockUser( userId,blockedUserId);
+    }catch(err){
+        throw err;
+    }
   }
 
-  @Post(':userId/unblock/:blockedUserId')
-  unblockUser(@Param('userId') userId: string, @Param('blockedUserId') blockedUserId: string) {
-    return this.blockService.unblockUser(userId, blockedUserId);
+  @Post('/unblock/:blockedUserId')
+  async unblockUser(@Req() req,@Param('blockedUserId') blockedUserId: string) {
+    try{
+        const userId = req.userId.userId;
+    return await this.blockService.unblockUser(userId,blockedUserId);
+    }catch(err){
+        throw err;
+    }
   }
 }
