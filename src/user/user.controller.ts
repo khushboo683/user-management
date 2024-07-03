@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdateUserDto, SearchUserDto } from './userDto';
 
@@ -25,10 +25,11 @@ export class UserController {
     }
   }
   @Patch('/')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto)
+  async update(@Req() req, @Body() updateUserDto: UpdateUserDto)
    {
+    const userId = req.userId.userId;
     try{
-    return await this.userService.update(id, updateUserDto);
+    return await this.userService.update(userId, updateUserDto);
     }catch(err){
         throw err;
     }
@@ -44,9 +45,10 @@ export class UserController {
   }
 
   @Get('/search')
-  async search(@Query() searchUserDto: SearchUserDto) {
+  async search(@Req() req,@Query() searchUserDto: SearchUserDto) {
     try{
-        return await this.userService.search(searchUserDto);
+        const userId = req.userId.userId;
+        return await this.userService.search(searchUserDto,userId);
     }catch(err){
        throw err;
     }
