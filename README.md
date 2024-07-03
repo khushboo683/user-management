@@ -39,3 +39,7 @@ npm install
 npm start
 ```
 ### 4. You can derive token for a particular user using the generateToken() function in main.ts file.
+
+## Architecture
+
+![architecture](./screenshots/screenshot.png)
